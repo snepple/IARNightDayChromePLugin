@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 250px;
+      padding: 15px;
+      text-align: center;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .success {
+      color: green !important;
+    }
+    .error {
+      color: red !important;
+    }
+  </style>
+</head>
+<body>
+  <h3>IamResponding Theme</h3>
+  <p>To automatically switch themes based on sunrise/sunset, we need your location.</p>
+  <button id="requestLocation">Grant Location Access</button>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

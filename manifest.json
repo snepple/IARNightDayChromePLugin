@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "IamResponding Auto Theme",
+  "version": "1.0",
+  "description": "Automatically switches IamResponding dashboard between light and dark modes based on sunrise and sunset.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "offscreen",
+    "geolocation"
+  ],
+  "host_permissions": [
+    "https://dashboard.iamresponding.com/*",
+    "https://api.sunrise-sunset.org/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://dashboard.iamresponding.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "IamResponding Auto Theme"
+  }
+}
