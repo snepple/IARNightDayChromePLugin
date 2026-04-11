@@ -11,7 +11,8 @@
   ],
   "host_permissions": [
     "https://dashboard.iamresponding.com/*",
-    "https://api.sunrise-sunset.org/*"
+    "https://api.sunrise-sunset.org/*",
+    "https://auth.iamresponding.com/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -19,13 +20,30 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://dashboard.iamresponding.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://dashboard.iamresponding.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://auth.iamresponding.com/*"
+      ],
+      "js": [
+        "login.js"
+      ],
       "run_at": "document_idle"
     }
   ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "IamResponding Auto Theme"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
   }
 }
