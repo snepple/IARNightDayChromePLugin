@@ -92,3 +92,55 @@ chrome.runtime.onMessage.addListener((message) => {
     setTargetTheme(message.themeState);
   }
 });
+
+
+function adjustAgencyNameFontSize() {
+  const container = document.querySelector('.iar-agency-name');
+  let textElement = document.querySelector('[data-cy="Agency-Name"]');
+  // If the direct target doesn't work, maybe the container itself has the text
+  if (!textElement && container) { textElement = container; }
+
+  if (!container || !textElement) return;
+
+  const resizeText = () => {
+    // Reset to max font size first to re-calculate if container grows
+    textElement.style.fontSize = '1.8rem';
+    let currentFontSize = parseFloat(window.getComputedStyle(textElement).fontSize);
+
+    // Decrease font size until it fits
+    while (textElement.scrollWidth > container.clientWidth && currentFontSize > 10) {
+      currentFontSize -= 1;
+      textElement.style.fontSize = `${currentFontSize}px`;
+    }
+  };
+
+  // Run initially
+  resizeText();
+
+  // Create ResizeObserver to handle window resizes
+  const resizeObserver = new ResizeObserver(() => {
+    requestAnimationFrame(resizeText);
+  });
+
+  resizeObserver.observe(container);
+}
+
+// Check for agency name element initially
+const agencyName = document.querySelector('[data-cy="Agency-Name"]');
+if (agencyName) {
+  adjustAgencyNameFontSize();
+} else {
+  // If not there yet, observe DOM until it is
+  const observer = new MutationObserver((mutations, obs) => {
+    const agencyName = document.querySelector('[data-cy="Agency-Name"]');
+    if (agencyName) {
+      adjustAgencyNameFontSize();
+      obs.disconnect();
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
