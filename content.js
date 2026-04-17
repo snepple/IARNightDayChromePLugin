@@ -144,3 +144,33 @@ if (agencyName) {
     subtree: true
   });
 }
+
+
+function hideRespondNowButton() {
+  chrome.storage.local.get(['iar_hide_respond_now'], (result) => {
+    if (result.iar_hide_respond_now) {
+      // Create a style element to permanently hide any button containing the text "Respond Now"
+      // Since CSS :contains is not standard, we'll use a MutationObserver.
+      const observer = new MutationObserver(() => {
+        const buttons = document.querySelectorAll('button');
+        for (const btn of buttons) {
+          if (btn.textContent && btn.textContent.trim() === 'Respond Now') {
+            if (btn.style.display !== 'none') {
+              btn.style.display = 'none';
+            }
+          }
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+      // Also do an initial pass
+      const buttons = document.querySelectorAll('button');
+      for (const btn of buttons) {
+        if (btn.textContent && btn.textContent.trim() === 'Respond Now') {
+          btn.style.display = 'none';
+        }
+      }
+    }
+  });
+}
+hideRespondNowButton();
