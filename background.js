@@ -22,6 +22,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateTimesAndSchedule();
   } else if (message.type === 'GET_THEME_STATE') {
     // Content script requesting current state on load
+    // Trigger an update immediately to recover from stuck state if alarm failed
+    updateTimesAndSchedule();
     chrome.storage.local.get(['themeState'], (result) => {
       sendResponse({ themeState: result.themeState || 'day' });
     });
@@ -95,7 +97,11 @@ async function updateTimesAndSchedule() {
   if (!location) return;
 
   const times = await fetchSunriseSunset(location.latitude, location.longitude);
-  if (!times) return;
+  if (!times) {
+    // If API fails (e.g. network down when waking from sleep), retry in 5 minutes
+    chrome.alarms.create('THEME_SWITCH', { when: Date.now() + 5 * 60 * 1000 });
+    return;
+  }
 
   const now = new Date();
   let themeState = 'day';
