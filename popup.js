@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Notify background script that location was updated
             chrome.runtime.sendMessage({ type: 'LOCATION_UPDATED' });
+            // Clear the notification badge
+            chrome.action.setBadgeText({ text: '' });
           });
         },
         (error) => {

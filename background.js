@@ -8,7 +8,8 @@ chrome.runtime.onInstalled.addListener(() => {
       // Manifest v3 allows action.openPopup() in some contexts but typically requires user interaction.
       // Easiest is to open it in a tab or just notify them.
       // We will create a small onboarding tab if location is missing.
-      chrome.tabs.create({ url: 'popup.html' });
+      chrome.action.setBadgeText({ text: "!" });
+      chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
     } else {
       updateTimesAndSchedule();
     }
