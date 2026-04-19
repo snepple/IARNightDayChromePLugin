@@ -34,7 +34,7 @@ async function performAutoLogin() {
     }
 
     // 2. Check if we are on the login page
-    if (window.location.href.toLowerCase().includes("/login/member")) {
+    if (window.location.pathname.toLowerCase().includes("/login/member")) {
       console.log("[IamResponding Auto Login] Login page detected. Waiting for fields...");
 
       // Wait for fields to be available
@@ -85,7 +85,7 @@ new MutationObserver(() => {
   const url = location.href;
   if (url !== lastUrl) {
     lastUrl = url;
-    if (url.toLowerCase().includes("/login/member")) {
+    if (window.location.pathname.toLowerCase().includes("/login/member")) {
        console.log("[IamResponding Auto Login] URL changed to login page. Triggering auto-login.");
        setTimeout(performAutoLogin, 1000); // Wait a bit for DOM to settle
     }
