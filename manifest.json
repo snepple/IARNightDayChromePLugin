@@ -24,6 +24,7 @@
         "https://dashboard.iamresponding.com/*"
       ],
       "js": [
+        "utils.js",
         "content.js"
       ],
       "run_at": "document_idle"
@@ -33,6 +34,7 @@
         "https://auth.iamresponding.com/*"
       ],
       "js": [
+        "utils.js",
         "login.js"
       ],
       "run_at": "document_idle"

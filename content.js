@@ -1,27 +1,3 @@
-// Wait for DOM to be ready
-function waitForElement(selector, maxTries = 20) {
-  return new Promise((resolve, reject) => {
-    let tries = 0;
-    const interval = setInterval(() => {
-      const el = document.querySelector(selector);
-      if (el) {
-        clearInterval(interval);
-        resolve(el);
-      } else {
-        tries++;
-        if (tries >= maxTries) {
-          clearInterval(interval);
-          reject(new Error(`Element not found: ${selector}`));
-        }
-      }
-    }, 500);
-  });
-}
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function setTargetTheme(targetTheme) {
   console.log(`[IamResponding Auto Theme] Attempting to set theme to: ${targetTheme}`);
 
