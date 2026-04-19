@@ -76,7 +76,7 @@ async function getLocation() {
   });
 }
 
-async function fetchSunriseSunset(lat, lng) {
+export async function fetchSunriseSunset(lat, lng) {
   try {
     const response = await fetch(`${API_URL}?lat=${lat}&lng=${lng}&formatted=0`);
     const data = await response.json();
