@@ -1,20 +1,29 @@
 // Wait for DOM to be ready
 function waitForElement(selector, maxTries = 20) {
   return new Promise((resolve, reject) => {
-    let tries = 0;
-    const interval = setInterval(() => {
+    const el = document.querySelector(selector);
+    if (el) {
+      return resolve(el);
+    }
+
+    const observer = new MutationObserver((mutations, obs) => {
       const el = document.querySelector(selector);
       if (el) {
-        clearInterval(interval);
+        obs.disconnect();
+        clearTimeout(timeout);
         resolve(el);
-      } else {
-        tries++;
-        if (tries >= maxTries) {
-          clearInterval(interval);
-          reject(new Error(`Element not found: ${selector}`));
-        }
       }
-    }, 500);
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+
+    const timeout = setTimeout(() => {
+      observer.disconnect();
+      reject(new Error(`Element not found: ${selector}`));
+    }, maxTries * 500);
   });
 }
 
