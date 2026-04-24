@@ -101,25 +101,12 @@ function adjustAgencyNameFontSize() {
   resizeObserver.observe(container);
 }
 
-// Check for agency name element initially
-const agencyName = document.querySelector('[data-cy="Agency-Name"]');
-if (agencyName) {
-  adjustAgencyNameFontSize();
-} else {
-  // If not there yet, observe DOM until it is
-  const observer = new MutationObserver((mutations, obs) => {
-    const agencyName = document.querySelector('[data-cy="Agency-Name"]');
-    if (agencyName) {
-      adjustAgencyNameFontSize();
-      obs.disconnect();
-    }
+// Wait for agency name element to be present and then adjust its font size
+waitForElement('[data-cy="Agency-Name"]')
+  .then(adjustAgencyNameFontSize)
+  .catch(() => {
+    console.debug('[IamResponding Auto Theme] Agency name element not found for font size adjustment.');
   });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
 
 
 function hideRespondNowButton() {
