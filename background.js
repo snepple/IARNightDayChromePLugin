@@ -78,7 +78,7 @@ async function getLocation() {
 
 export async function fetchSunriseSunset(lat, lng) {
   try {
-    const response = await fetch(`${API_URL}?lat=${lat}&lng=${lng}&formatted=0`);
+    const response = await fetch(`${API_URL}?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&formatted=0`);
     const data = await response.json();
     if (data.status === 'OK') {
       return {
@@ -123,7 +123,7 @@ async function updateTimesAndSchedule() {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
     try {
-      const resp = await fetch(`${API_URL}?lat=${location.latitude}&lng=${location.longitude}&date=${tomorrowStr}&formatted=0`);
+      const resp = await fetch(`${API_URL}?lat=${encodeURIComponent(location.latitude)}&lng=${encodeURIComponent(location.longitude)}&date=${encodeURIComponent(tomorrowStr)}&formatted=0`);
       const data = await resp.json();
       if (data.status === 'OK') {
         nextAlarmTime = new Date(data.results.sunrise).getTime();
