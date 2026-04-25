@@ -24,8 +24,7 @@
         "https://dashboard.iamresponding.com/*"
       ],
       "js": [
-        "utils.js",
-        "content.js"
+        "content-loader.js"
       ],
       "run_at": "document_idle"
     },
@@ -34,10 +33,22 @@
         "https://auth.iamresponding.com/*"
       ],
       "js": [
-        "utils.js",
-        "login.js"
+        "login-loader.js"
       ],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "utils.js",
+        "content.js",
+        "login.js"
+      ],
+      "matches": [
+        "https://dashboard.iamresponding.com/*",
+        "https://auth.iamresponding.com/*"
+      ]
     }
   ],
   "action": {
