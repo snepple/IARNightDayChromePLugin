@@ -1,3 +1,5 @@
+import { waitForElement, sleep } from './utils.js';
+
 async function performAutoLogin() {
   try {
     // 1. Handle Cookie Consent if present

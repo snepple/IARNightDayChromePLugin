@@ -8,7 +8,7 @@
  * @param {number} maxTries - Maximum number of times to check (default 40, which is 20 seconds at 500ms intervals).
  * @returns {Promise<Element>}
  */
-function waitForElement(selector, maxTries = 40) {
+export function waitForElement(selector, maxTries = 40) {
   return new Promise((resolve, reject) => {
     let tries = 0;
     const interval = setInterval(() => {
@@ -32,6 +32,6 @@ function waitForElement(selector, maxTries = 40) {
  * @param {number} ms - Milliseconds to sleep.
  * @returns {Promise<void>}
  */
-function sleep(ms) {
+export function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -1,3 +1,5 @@
+import { waitForElement, sleep } from './utils.js';
+
 async function setTargetTheme(targetTheme) {
   console.log(`[IamResponding Auto Theme] Attempting to set theme to: ${targetTheme}`);
 
