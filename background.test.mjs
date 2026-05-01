@@ -33,6 +33,7 @@ global.chrome = {
 };
 
 const { fetchSunriseSunset } = await import('./background.js');
+const onInstalledListener = global.chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 describe('fetchSunriseSunset', () => {
   const lat = 36.7201600;
@@ -103,5 +104,36 @@ describe('fetchSunriseSunset', () => {
 
     expect(result).toBeNull();
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe('onInstalled listener', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('sets badge when location is missing', () => {
+    onInstalledListener();
+
+    // The listener calls chrome.storage.local.get(['location'], ...)
+    expect(global.chrome.storage.local.get).toHaveBeenCalledWith(['location'], expect.any(Function));
+    const getCallback = global.chrome.storage.local.get.mock.calls[0][1];
+
+    // Simulate missing location
+    getCallback({});
+
+    expect(global.chrome.action.setBadgeText).toHaveBeenCalledWith({ text: "!" });
+    expect(global.chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: "#FF0000" });
+  });
+
+  test('does not set badge when location exists', () => {
+    onInstalledListener();
+
+    const getCallback = global.chrome.storage.local.get.mock.calls[0][1];
+
+    // Simulate location exists
+    getCallback({ location: { latitude: 36.72, longitude: -4.42 } });
+
+    expect(global.chrome.action.setBadgeText).not.toHaveBeenCalled();
   });
 });

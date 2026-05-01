@@ -4,10 +4,7 @@ const API_URL = 'https://api.sunrise-sunset.org/json';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(['location'], (result) => {
     if (!result.location) {
-      // If no location, prompt user by opening options/popup or similar
-      // Manifest v3 allows action.openPopup() in some contexts but typically requires user interaction.
-      // Easiest is to open it in a tab or just notify them.
-      // We will create a small onboarding tab if location is missing.
+      // TODO: Implement an onboarding flow (e.g., opening a tab) when location is missing.
       chrome.action.setBadgeText({ text: "!" });
       chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
     } else {
