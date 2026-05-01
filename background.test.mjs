@@ -11,8 +11,8 @@ global.chrome = {
   },
   storage: {
     local: {
-      get: jest.fn(),
-      set: jest.fn()
+      get: jest.fn((k, cb) => { if (cb) cb({}); return Promise.resolve({}); }),
+      set: jest.fn((i, cb) => { if (cb) cb(); return Promise.resolve(); })
     }
   },
   action: {
@@ -41,6 +41,10 @@ describe('fetchSunriseSunset', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    global.chrome.storage.local.get.mockImplementation((k, cb) => {
+      if (cb) cb({});
+      return Promise.resolve({});
+    });
     global.fetch = jest.fn();
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
