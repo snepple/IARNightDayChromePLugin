@@ -32,7 +32,89 @@ global.chrome = {
   }
 };
 
-const { fetchSunriseSunset } = await import('./background.js');
+const { fetchSunriseSunset, getLocation } = await import('./background.js');
+
+describe('getLocation', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('returns location from storage if available', async () => {
+    const mockLocation = { latitude: 40.7128, longitude: -74.0060 };
+    chrome.storage.local.get.mockImplementation((keys, callback) => {
+      callback({ location: mockLocation });
+    });
+
+    const result = await getLocation();
+
+    expect(result).toEqual(mockLocation);
+    expect(chrome.storage.local.get).toHaveBeenCalledWith(['location'], expect.any(Function));
+    expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  test('requests location from offscreen document if not in storage', async () => {
+    const mockLocation = { latitude: 34.0522, longitude: -118.2437 };
+
+    // Not in storage
+    chrome.storage.local.get.mockImplementation((keys, callback) => {
+      callback({});
+    });
+
+    // No existing offscreen document
+    chrome.runtime.getURL.mockReturnValue('chrome-extension://id/offscreen.html');
+    chrome.runtime.getContexts.mockResolvedValue([]);
+    chrome.offscreen.createDocument.mockResolvedValue();
+
+    // Successful message response
+    chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+      if (message.type === 'GET_LOCATION') {
+        callback({ success: true, location: mockLocation });
+      }
+    });
+
+    const result = await getLocation();
+
+    expect(result).toEqual(mockLocation);
+    expect(chrome.offscreen.createDocument).toHaveBeenCalled();
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
+      { type: 'GET_LOCATION' },
+      expect.any(Function)
+    );
+  });
+
+  test('does not recreate offscreen document if it already exists', async () => {
+    chrome.storage.local.get.mockImplementation((keys, callback) => {
+      callback({});
+    });
+
+    chrome.runtime.getContexts.mockResolvedValue([{ contextType: 'OFFSCREEN_DOCUMENT' }]);
+
+    chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+      callback({ success: true, location: { lat: 1, lng: 1 } });
+    });
+
+    await getLocation();
+
+    expect(chrome.offscreen.createDocument).not.toHaveBeenCalled();
+  });
+
+  test('returns null if offscreen document fails to get location', async () => {
+    chrome.storage.local.get.mockImplementation((keys, callback) => {
+      callback({});
+    });
+
+    chrome.runtime.getContexts.mockResolvedValue([]);
+    chrome.offscreen.createDocument.mockResolvedValue();
+
+    chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+      callback({ success: false });
+    });
+
+    const result = await getLocation();
+
+    expect(result).toBeNull();
+  });
+});
 
 describe('fetchSunriseSunset', () => {
   const lat = 36.7201600;

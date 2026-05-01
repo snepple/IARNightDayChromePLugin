@@ -56,7 +56,7 @@ async function setupOffscreenDocument(path) {
   });
 }
 
-async function getLocation() {
+export async function getLocation() {
   return new Promise((resolve) => {
     chrome.storage.local.get(['location'], async (result) => {
       if (result.location) {
