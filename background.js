@@ -1,7 +1,25 @@
 const API_URL = 'https://api.sunrise-sunset.org/json';
 
+function pruneSunCache() {
+  chrome.storage.local.get(null, (items) => {
+    const nowStr = new Date().toISOString().split('T')[0];
+    const keysToRemove = Object.keys(items).filter(key => {
+      if (key.startsWith('sun_cache_')) {
+        const parts = key.split('_');
+        const dateStr = parts[parts.length - 1];
+        return dateStr < nowStr;
+      }
+      return false;
+    });
+    if (keysToRemove.length > 0) {
+      chrome.storage.local.remove(keysToRemove);
+    }
+  });
+}
+
 // Initialize on install
 chrome.runtime.onInstalled.addListener(() => {
+  pruneSunCache();
   chrome.storage.local.get(['location'], (result) => {
     if (!result.location) {
       // If no location, prompt user by opening options/popup or similar
@@ -76,20 +94,54 @@ async function getLocation() {
   });
 }
 
-export async function fetchSunriseSunset(lat, lng) {
-  try {
-    const response = await fetch(`${API_URL}?lat=${lat}&lng=${lng}&formatted=0`);
-    const data = await response.json();
-    if (data.status === 'OK') {
-      return {
-        sunrise: new Date(data.results.sunrise),
-        sunset: new Date(data.results.sunset)
-      };
-    }
-  } catch (error) {
-    console.error('Error fetching sunrise/sunset:', error);
+const pendingRequests = new Map();
+
+export async function fetchSunriseSunset(lat, lng, date = null) {
+  const dateStr = date || new Date().toISOString().split('T')[0];
+  const cacheKey = `sun_cache_${lat.toFixed(4)}_${lng.toFixed(4)}_${dateStr}`;
+
+  if (pendingRequests.has(cacheKey)) {
+    return pendingRequests.get(cacheKey);
   }
-  return null;
+
+  const requestPromise = (async () => {
+    try {
+      const cached = await new Promise(resolve => {
+        chrome.storage.local.get([cacheKey], (result) => resolve(result));
+      });
+
+      if (cached && cached[cacheKey]) {
+        const data = cached[cacheKey];
+        return {
+          sunrise: new Date(data.sunrise),
+          sunset: new Date(data.sunset)
+        };
+      }
+
+      const url = `${API_URL}?lat=${lat}&lng=${lng}&formatted=0${date ? `&date=${date}` : ''}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.status === 'OK') {
+        const results = {
+          sunrise: data.results.sunrise,
+          sunset: data.results.sunset
+        };
+        chrome.storage.local.set({ [cacheKey]: results });
+        return {
+          sunrise: new Date(results.sunrise),
+          sunset: new Date(results.sunset)
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching sunrise/sunset:', error);
+    } finally {
+      pendingRequests.delete(cacheKey);
+    }
+    return null;
+  })();
+
+  pendingRequests.set(cacheKey, requestPromise);
+  return requestPromise;
 }
 
 async function updateTimesAndSchedule() {
@@ -122,16 +174,11 @@ async function updateTimesAndSchedule() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
-    try {
-      const resp = await fetch(`${API_URL}?lat=${location.latitude}&lng=${location.longitude}&date=${tomorrowStr}&formatted=0`);
-      const data = await resp.json();
-      if (data.status === 'OK') {
-        nextAlarmTime = new Date(data.results.sunrise).getTime();
-      } else {
-         // fallback: add 24h
-         nextAlarmTime = now.getTime() + 24 * 60 * 60 * 1000;
-      }
-    } catch(e) {
+    const tomorrowTimes = await fetchSunriseSunset(location.latitude, location.longitude, tomorrowStr);
+    if (tomorrowTimes) {
+      nextAlarmTime = tomorrowTimes.sunrise.getTime();
+    } else {
+      // fallback: add 24h
       nextAlarmTime = now.getTime() + 24 * 60 * 60 * 1000;
     }
   }
