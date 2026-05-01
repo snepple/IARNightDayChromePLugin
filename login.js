@@ -1,4 +1,4 @@
-import { waitForElement, sleep } from './utils.js';
+import { waitForElement, sleep, decryptPassword } from './utils.js';
 
 async function performAutoLogin() {
   try {
@@ -26,9 +26,11 @@ async function performAutoLogin() {
         if (result.iar_agency && result.iar_username && result.iar_password) {
           console.log("[IamResponding Auto Login] Credentials found, filling form...");
 
+          const password = await decryptPassword(result.iar_password);
+
           agencyBox.value = result.iar_agency;
           userBox.value = result.iar_username;
-          passBox.value = result.iar_password;
+          passBox.value = password;
 
           // Dispatch input events in case the page uses React/Angular/Vue which needs events to update internal state
           agencyBox.dispatchEvent(new Event('input', { bubbles: true }));
